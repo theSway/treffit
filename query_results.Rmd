@@ -54,7 +54,7 @@ div.summary { background-color:#ffd4e0; border-radius: 5px; padding: 20px; font-
 </style>
 <div class = "summary">
 
-Voidaan todeta, että kyselyyn on saatu melko tasapuolisesti vastauksia sekä miehiltä että naisilta, joten voidaan olettaa vastausten olevan pitkälti ei-sukupuolittuneita. Vanhemmassa ikäluokassa (>30) on lievä miesten yliedustus.
+Voidaan todeta, että kyselyyn on saatu melko tasapuolisesti vastauksia sekä miehiltä että naisilta, joten voidaan olettaa, että vastauksissa saadaan tasapuolisesti kuvattua kumpikin sukupuoli. Muunsukupuolisia vastaajia oli ainoastaan yksi, joten jos tuloksia tarkastellaan sukupuolittain, käsitellään vain miehiksi ja naisiksi itsensä kokevien vastaajien vastauksia. Vanhemmassa ikäluokassa (>30) on lievä miesten yliedustus.
 </div>
 
 <br />
