@@ -1,0 +1,54 @@
+---
+title: "Sokkotreffikysely"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+# Set working directory
+knitr::opts_knit$set(root.dir = "/home/esa/Downloads")
+
+library(ggplot2)
+library(ggthemes)
+library(sjPlot)
+library(RColorBrewer)
+
+theme_set(theme_minimal())
+
+mypalette <- brewer.pal(n = 6, "RdPu")[3:6]
+pinkpalette <- c("#FCC5C0", "#FA9FB5", "#C51B8A")
+cbbpalette <- c("#E69F00", "#D55E00", "#CC79A7")
+```
+
+```{r load_data, echo = FALSE}
+raw <- read.csv("results.csv")
+colnames(raw) <- c("time", "sex", "age", "attitude", "needs", "self.traits", "partner.traits")
+raw$age <- 2019 - raw$age
+```
+
+## Vastaajien ikäjakauma
+```{r ikäjakauma, fig.align = "center", echo = FALSE, fig.width = 12}
+ggplot(data = raw, aes(x = age, fill = sex)) + 
+  geom_bar() + 
+  theme_minimal() +
+  labs(x = "",
+       y = "",
+       title = "Vastaajien ikäjakauma: 20 - 41",
+       subtitle = "Tyypillisin vastaaja: 24-vuotias",
+       fill = "") +
+  scale_fill_manual(values = pinkpalette)
+```
+
+## Vastaajien sukupuolijakauma
+```{r sukupuolijakauma, fig.align = "center", echo = FALSE, fig.height = 2, fig.width = 12, message = FALSE}
+plot_stackfrq(raw$sex) + scale_fill_manual(values = pinkpalette) + labs(title = "Sukupuolijakauma tasainen")
+```
+
+<style>
+div.summary { background-color:#ffd4e0; border-radius: 5px; padding: 20px; font-size: 20px;}
+</style>
+<div class = "summary">
+
+Voidaan todeta, että kyselyyn on saatu melko tasapuolisesti vastauksia sekä miehiltä että naisilta, joten voidaan olettaa vastausten olevan pitkälti ei-sukupuolittuneita. Vanhemmassa ikäluokassa (>30) on lievä miesten yliedustus.
+</div>
+
+
