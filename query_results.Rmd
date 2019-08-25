@@ -1,16 +1,17 @@
 ---
 title: "Sokkotreffikysely"
+author: "(N = 68)"
 output: html_document
+knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file = file.path(dirname(inputFile), 'index.html')) })
 ---
 
 ```{r setup, include = FALSE}
 # Set working directory
-knitr::opts_knit$set(root.dir = "/home/esa/Downloads")
-
 library(ggplot2)
 library(ggthemes)
 library(sjPlot)
 library(RColorBrewer)
+library(plyr)
 
 theme_set(theme_minimal())
 
@@ -20,27 +21,32 @@ cbbpalette <- c("#E69F00", "#D55E00", "#CC79A7")
 ```
 
 ```{r load_data, echo = FALSE}
-raw <- read.csv("results.csv")
+raw <- read.csv("data/results.csv")
 colnames(raw) <- c("time", "sex", "age", "attitude", "needs", "self.traits", "partner.traits")
 raw$age <- 2019 - raw$age
+raw$needs <- as.character(raw$needs)
+raw$self.traits <- as.character(raw$self.traits)
+raw$partner.traits <- as.character(raw$partner.traits)
 ```
 
-## Vastaajien ikäjakauma
 ```{r ikäjakauma, fig.align = "center", echo = FALSE, fig.width = 12}
 ggplot(data = raw, aes(x = age, fill = sex)) + 
   geom_bar() + 
-  theme_minimal() +
   labs(x = "",
        y = "",
        title = "Vastaajien ikäjakauma: 20 - 41",
        subtitle = "Tyypillisin vastaaja: 24-vuotias",
        fill = "") +
-  scale_fill_manual(values = pinkpalette)
+  scale_fill_manual(values = pinkpalette) +
+  theme(text = element_text(size=20))
 ```
 
-## Vastaajien sukupuolijakauma
 ```{r sukupuolijakauma, fig.align = "center", echo = FALSE, fig.height = 2, fig.width = 12, message = FALSE}
-plot_stackfrq(raw$sex) + scale_fill_manual(values = pinkpalette) + labs(title = "Sukupuolijakauma tasainen")
+plot_stackfrq(raw$sex) + 
+  scale_fill_manual(values = pinkpalette) +
+  labs(title = "Vastaajien sukupuolijakauma") +
+  theme(text = element_text(size=20)) +
+  scale_x_discrete(labels = NULL)
 ```
 
 <style>
@@ -51,4 +57,113 @@ div.summary { background-color:#ffd4e0; border-radius: 5px; padding: 20px; font-
 Voidaan todeta, että kyselyyn on saatu melko tasapuolisesti vastauksia sekä miehiltä että naisilta, joten voidaan olettaa vastausten olevan pitkälti ei-sukupuolittuneita. Vanhemmassa ikäluokassa (>30) on lievä miesten yliedustus.
 </div>
 
+<br />
+```{r asenteet, fig.align = "center", echo = FALSE, fig.width = 12}
+ggplot(data = raw, aes(x = attitude, fill = sex)) + 
+  geom_bar() + 
+  labs(x = "",
+       y = "",
+       title = "Voisitko kuvitella käyväsi sokkotreffeillä?",
+       fill = "") +
+  scale_fill_manual(values = pinkpalette) +
+  theme(text = element_text(size=20)) +
+  scale_x_discrete(labels = c("En", "Olen suostuteltavissa", "Nautin siitä"))
+```
 
+<style>
+div.summary { background-color:#ffd4e0; border-radius: 5px; padding: 20px; font-size: 20px;}
+</style>
+<div class = "summary">
+Asenteet sokkotreffailuun eivät eroa merkittävästi sukupuolten välillä. Merkittävästi suurin osa vastaajista (85 %) ei kategorisesti kieltäydy sokkotreffien ideasta. Sokkotreffailusta nauttivia on otoksessa 13 % ja nekin jakautuvat miehiin ja naisiin tasaisesti (5 ja 4 kpl, vastaavasti).
+</div>
+<br />
+
+```{r, fig.align = "center", echo = FALSE, fig.width = 12}
+needslist <- strsplit(raw$needs, ";")
+ncited <- as.data.frame(plyr::count(unlist(needslist))); colnames(ncited) <- c("choice", "freq")
+singles <- c()
+for(needs in needslist){if(length(needs) == 1){singles <- c(singles, needs)}}
+singles.df <- as.data.frame(plyr::count(singles)); colnames(singles.df) <- c("choice", "freq")
+
+
+ggplot(data = ncited) + 
+  geom_bar(aes(x = choice, y = freq), stat = "identity", fill = "#FCC5C0") +
+  labs(x = "",
+       y = "",
+       title = "Etsisitkö sokkotreffeiltä pääasiassa",
+       fill = "") +
+  theme(text = element_text(size=20)) +
+  coord_flip()
+
+ggplot(data = singles.df) + 
+  geom_bar(aes(x = choice, y = freq), stat = "identity", fill = "#FCC5C0") +
+  labs(x = "",
+       y = "",
+       title = "Yhden vaihtoehdon valinneet",
+       fill = "") +
+  theme(text = element_text(size=20)) +
+  coord_flip()
+```
+
+<style>
+div.summary { background-color:#ffd4e0; border-radius: 5px; padding: 20px; font-size: 20px;}
+</style>
+<div class = "summary">
+Tällä kysymyksellä haluttiin kartoittaa ihmisten tarpeita ja (sokkotreffi)kysynnän laatua. Vastausvaihtoehtoja sai valita useamman ja vastaajat käyttivätkin tätä ominaisuutta ilolla: 68 vastaajaa onnistuivat luomaan 34 uniikkia vastausyhdistelmää! Ainoastaan 12 % vastaajista haki jotakin yhtä tiettyä asiaa. Tyypillisimmin kuitenkin valittiin "Seksiä ja/tai läheisyyttä ilman sitoumuksia" ja "Suljettua pitkäaikaista seurustelusuhdetta". Avoimet suhteet ja ns. "määräaikaiset suljetut" jäivät vastaajien keskuudessa vähemmälle suosiolle.
+</div>
+<br />
+<style>
+div.note { background-color:#ff6b6b; border-radius: 5px; padding: 20px; font-size: 13px;}
+</style>
+<div class = "note">
+Vastausvaihtoehto "En osaa sanoa" osoittautui vastaajille ja analyysissa hankalaksi. Tarkoitus oli tarjota vastausvaihtoehto niille, jotka eivät osanneet valita vaihtoehdoista suosiksiksi mitään. Jos valitsee "En osaa sanoa", mutta lisäksi jotain muuta, on vastaus helppo tulkita niin, että vastaaja etsii pääasiassa sitä minkä pystyi vaihtoehdoista yksilöimään. Toisaalta kaikki vastaajat, jotka valitsivat useamman kuin yhden tai kaksi vaihtoehtoa voidaan oletettavasti asettaa johonkin kohtaan "Tiedän mitä haluan <--> En tiedä mitä haluan" -janalla. Toki usea varmasti tietää haluavansa useampaa asiaa, moni ei aidosti tiedä mitä haluaa ja osa luulee tietävänsä mitä haluaa.
+</div>
+<br />
+
+
+```{r, fig.align = "center", echo = FALSE, fig.width = 12, fig.height = 9}
+mytraits <- read.csv("data/mytraits.txt", sep="\n")
+mytraits.df <- as.data.frame(plyr::count(mytraits)); colnames(mytraits.df) <- c("trait", "freq")
+
+ggplot(data = mytraits.df) +
+  geom_bar(aes(x = reorder(trait, freq), y = freq), stat = "identity", fill = "#FCC5C0") +
+  labs(x = "",
+       y = "",
+       title = "Tärkeimmät piirteesi ystävän valitessa treffikumppania sinulle?",
+       fill = "") +
+  theme(text = element_text(size=20)) +
+  coord_flip()
+```
+<style>
+div.summary { background-color:#ffd4e0; border-radius: 5px; padding: 20px; font-size: 20px;}
+</style>
+<div class = "summary">
+Kysymys oli tarkoituksella monimutkainen. Tarkoitus oli päästä mahdollisimman vastauksia, joissa heijastuisi se, miten vastaaja kokee itsensä muiden seurassa/kautta. Tällä tavoin saadaan toivottavasti vastauksia, joissa painottuu tapaamisen onnistumisen varmistaminen sen sijaan, että niissä painottuisi se, millä vastaaja itseään tuntemattomille möisi. Moni vastaaja oli saanut kopin kysymyksen ideasta ja kirjoittaneet esimerkiksi harrastavansa jollakin tapaa "hankalaa huumoria" tai olevansa "vittumaisia" tai ujoja. Toisaalta vastauksista löytyi myös myyntipuheita, sillä esimerkiksi eräs toivoi ystävänsä ottavan huomioon treffikumppania valitessaan, että hänellä on hyvä perse. <br />
+<br />
+Kaiken kaikkiaan vastaajat pitivät tärkeimpänä ominaisuutenaan sokkotreffejä ajatellen huumorintajuaan. Tähän ryhmään on niputettu kaikki, jotka vastasivat skaalalla "Hyvä huumorintaju" - "Sarkasmi" - "Kuiva huumorintaju". Ennen kaikkea tunnuttiin olevan kiinnostuneita siitä, että ystävä ymmärtää treffikumppanin huumorintajun yhteensopivuuden tärkeyden. Kiinnostuksen kohteita pidettiin myös tärkeinä, oletettavasti jotta ystävä kykenee löytämään vastaajalle kumppanin, jonka kanssa synkkaa harrastuksellisella tasolla. Näiden lisäksi monet kehuivat itseään avoimiksi, huomaavaisiksi ja ystävällisiksi. Ehkei maailma lopulta olekaan niin synkkä paikka? :)
+</div>
+<br />
+
+```{r, fig.align = "center", echo = FALSE, fig.width = 12, fig.height = 10}
+mytraits <- read.csv("data/partnertraits.txt", sep="\n")
+mytraits.df <- as.data.frame(plyr::count(mytraits)); colnames(mytraits.df) <- c("trait", "freq")
+
+ggplot(data = mytraits.df) +
+  geom_bar(aes(x = reorder(trait, freq), y = freq), stat = "identity", fill = "#FCC5C0") +
+  labs(x = "",
+       y = "",
+       title = "Tärkeimmät piirteet valittavalle treffikumppanille?",
+       fill = "") +
+  theme(text = element_text(size=20)) +
+  coord_flip()
+```
+<style>
+div.summary { background-color:#ffd4e0; border-radius: 5px; padding: 20px; font-size: 20px;}
+</style>
+<div class = "summary">
+Tässä kysymyksessä oli ennen kaikkea kyse siitä, mitä ihmiset toivoisivat treffikumppaniltaan, jos tämän tapaa ilman minkäänlaista kosketusta tai käsitystä ihmisestä. Kysymyksen luonne on parillakin tavalla erilainen edellisestä: nyt vastaaja saa suoraan määrittää mikä hänen mielestään takaa onnistuneet treffit, eikä ole riskiä siitä, että vastaaja vääristelee omia ominaisuuksiaan (edes tahattomasti).<br />
+<br />
+Huumorintaju säilytti komeasti asemansa tärkeimpänä ominaisuutena, mutta muualla kärkijoukossa tapahtui liikettä. Ulkonäkö nousi odotetusti useita sijoja toiselle sijalle. Syitä on oletettavasti kaksi: ensimmäisessä kysymyksessä ulkonäkö ei ole lainkaan vastaajan vallassa, joten siitä ei tehdä numeroa. Toisessa kysymyksessä korostuu kuitenkin se, että treffikumppanista halutaan ehdottomasti viehättyä. Tai kuten eräs vastaaja hyvin asian tiivisti: "Perse".
+Avoimuus säilytti sijansa kolmanneksi tärkeimpänä ominaisuutena, mutta nyt älykkyys, keskustelutaito ja koulutus/ammatti nousivat arvojen ohitse! Omat arvot ovat vastaajille tärkeitä ja niiden vastaavuus on luultavasti varmistettu ensimmäisen kysymyksen kohdalla.
+</div>
+<br />
